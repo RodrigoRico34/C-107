@@ -1,43 +1,100 @@
 """
-Script de génération de hashes
+Auteur : Rodrigo Silva Riço
+Date : 08.06.2026
+Desc : générer un hash de texte saisi ou d'un fichier existant
 """
 import hashlib
-def generate_hash(password):
-    """Génère un hash avec l'algorithme spécifié"""
-    pwd_bytes = password.encode('utf-8')
-    return hashlib.sha256(pwd_bytes).hexdigest()
 
 
-while True:
-    choix = input("Tapez:\n[1] Hachage d'un texte saisi \n[2] Hachage d'un fichier texte existant \nQue choisissez vous : ")
-    if choix == '1':
-        data = input("Entrer une donnée: ")
-        generated_hash = generate_hash(data)
-        print(generated_hash+"\n")
-    elif choix == '2':
-        path = input("Entrer le chemin de votre fichier: ")
-        with open(path, 'r', encoding="utf-8") as file:
-            text = file.read()
-        generated_hash = generate_hash(text)
-        print(generated_hash+"\n")
-    else:
-        print("Choix invalide\n")
-
+def choice(text):
     while True:
-        # Bonus - sauvegarde du hash
-        sauvegarde = input("Sauvegarde (T/F): ")
-        if sauvegarde == 'T' or sauvegarde == 't' or sauvegarde == 'True' or sauvegarde == 'true':
-            try:
-                with open('sauvegarde_hashes.txt', 'a', encoding="utf-8") as file:
-                    file.write("-"+generated_hash+"\n")
-
-            except:
-                print("Fichier introuvable\n")
-            else:
-                print("Votre hash a donc été stocké !\n")
-                break
-        elif sauvegarde == 'F' or sauvegarde == 'f' or sauvegarde == 'False' or sauvegarde == 'false':
-            print("Votre hash n'a donc pas été stocké !\n")
-            break
+        user_input = input(text)
+        if user_input == "1":
+            return 1
+        if user_input == "2":
+            return 2
         else:
-            print("Choix invalide\n")
+            print("entrée invalide")
+
+
+user_input = choice("1 Hachage d’un texte saisi.\n2 Hachage d'un fichier texte existant.\n")
+
+if user_input == 1:
+    try:
+        print("Entrez votre texte (ligne vide pour terminer) :")
+
+        lines = []
+        while True:
+            line = input()
+            if line == "":
+                break
+            lines.append(line)
+
+        hash_input = "\n".join(lines)
+        hash_object = hashlib.sha256()
+
+        hash_object.update(hash_input.encode('utf-8'))
+
+        hash_hex = hash_object.hexdigest()
+
+        print(f"\n{hash_hex}")
+
+        # Si le fichier existe pas on le crée
+        with open('hash_output', 'a') as f:
+            pass
+
+        with open('hash_output', 'r') as f:
+            lines = f.readlines()
+
+            if lines:
+                last_line = lines[-1]
+                first_char = last_line[0]
+
+                number = int(last_line.split(')')[0]) + 1
+            else:
+                number = 1
+
+        with open('hash_output', 'a') as f:
+            f.write(f"{number}) {hash_hex}\n")
+
+    except Exception as e:
+        print(f"Erreur: {e}")
+
+if user_input == 2:
+    filepath = input("veuillez entrer le chemin d'accès du fichier : ")
+
+    try:
+        hash_object = hashlib.sha256()
+
+        with open(filepath, 'rb') as f:
+            data = f.read().replace(b'\r\n', b'\n')
+
+        hash_object.update(data)
+
+        hash_hex = hash_object.hexdigest()
+        print(f"Hash SHA-256 du fichier: {hash_hex}")
+
+        # si le fichier existe pas il est automatiquement créé
+        with open('hash_output', 'a') as f:
+            pass
+
+        with open('hash_output', 'r') as f:
+
+            lines = f.readlines()
+            if lines:
+                last_line = lines[-1]
+                first_char = last_line[0]
+
+                number = int(last_line.split(')')[0]) + 1
+            else:
+                number = 1
+
+        with open('hash_output', 'a') as f:
+            f.write(f"{number}) {hash_hex}\n")
+
+    except FileNotFoundError:
+        print("Erreur: Fichier introuvable!")
+    except PermissionError:
+        print("Erreur: Pas la permission de lire ce fichier!")
+    except Exception as e:
+        print(f"Erreur: {e}")
